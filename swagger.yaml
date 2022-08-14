@@ -1,0 +1,1820 @@
+openapi: 3.0.2
+info:
+  description: 'This is a prototypical implementation of a RBAC Profil in SCIM. Find more about SCIM @ [RFC7642](https://datatracker.ietf.org/doc/html/rfc7642), [RFC7643](https://datatracker.ietf.org/doc/html/rfc7643) and [RFC7644](https://datatracker.ietf.org/doc/html/rfc7644).'
+  title: A RBAC Profile for SCIM - OpenAPI 3.0
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: /api/v3
+tags:
+  - name: User
+    description: 'HTTP operations with User resource(s)'
+    externalDocs:
+      description: 'Full user documentation @'
+      url: 'https://datatracker.ietf.org/doc/html/rfc7643'
+  - name: Role
+    description: 'HTTP operations with Role resource(s)'
+  - name: Entitlement
+    description: 'HTTP operations with Entitlement resource(s)'
+  - name: Group
+    description: 'HTTP operations with Group resource(s)'
+    externalDocs:
+      description: 'More information and pristine "group solution" @'
+      url: 'https://datatracker.ietf.org/doc/html/rfc7643'
+  - name: Account
+    description: 'HTTP operations with Account resource(s)'
+  - name: Application
+    description: 'HTTP operations with Application resource(s)'
+  - name: Schema
+    description: 'HTTP operations with Schema resource(s)'
+    externalDocs:
+      description: 'Full documentaion @'
+      url: 'https://datatracker.ietf.org/doc/html/rfc7643'
+  - name: ServiceProviderConfig
+    description: 'HTTP operations with Config resource(s)'
+    externalDocs:
+      description: 'Full documentaion @'
+      url: 'https://datatracker.ietf.org/doc/html/rfc7643'
+  - name: ResourceTypes
+    description: 'HTTP operations with ResourceType resource(s)'
+    externalDocs:
+      description: 'Full documentaion @'
+      url: 'https://datatracker.ietf.org/doc/html/rfc7643'
+  
+paths:
+  /user:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      description: 'Get all users'
+      operationId: getUsers
+      responses:
+        '200':
+          description: 'Success - list of all Users'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: 'Bad request - request failed'
+      security:
+        - scim_auth:
+            - read:obj
+    post:
+      tags:
+        - User
+      summary: Create new user resource
+      description: 'Create new user resource'
+      operationId: createUser
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for User creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for User creation'
+          schema:
+            type: string
+            example: 'groups'
+      requestBody:
+        description: 'Content to create new user resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: 'Success - User created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 'Bad request - User not created'
+  /user/{id}:
+    get:
+      tags:
+        - User
+      summary: Get user by Id
+      description: 'Get user by Id'
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - User found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - User
+      summary: Update user by Id
+      description: 'Update user by Id'
+      operationId: updateUserById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent user by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: 'Success - User updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - User
+      summary: Update user value(s) by User Id
+      description: 'Update user value(s) by User Id'
+      operationId: patchUserById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent user by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - User value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - User
+      summary: Delete user by Id
+      description: 'Delete user by Id'
+      operationId: deleteUserByID
+      parameters:
+        - name: id
+          in: path
+          description: 'The user Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - User deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+  /role:
+    get:
+      tags:
+        - Role
+      summary: Get all roles
+      description: 'Get all roles'
+      operationId: getRoles
+      responses:
+        '200':
+          description: 'Success - list of all Roles'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        '400':
+          description: 'Bad request - request failed'
+    post:
+      tags:
+        - Role
+      summary: Create new role resource
+      description: 'Create new role resource'
+      operationId: createRole
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for Role creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for Role creation'
+          schema:
+            type: string
+            example: 'role'
+      requestBody:
+        description: 'Content to create new role resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '201':
+          description: 'Success - Role created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: 'Bad request - Role not created'
+  /role/{id}:
+    get:
+      tags:
+        - Role
+      summary: Get role by Id
+      description: 'Get role by Id'
+      operationId: getRoleById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Role found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - Role
+      summary: Update role by Id
+      description: 'Update role by Id'
+      operationId: updateRoleById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existing role by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '200':
+          description: 'Success - Role updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - Role
+      summary: Update role value(s) by Role Id
+      description: 'Update role value(s) by Role Id'
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent role by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - Role value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - Role
+      summary: Delete role by Id
+      description: 'Delete user by Id'
+      operationId: deleteRoleById
+      parameters:
+        - name: id
+          in: path
+          description: 'The role Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Role deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+  /entitlement:
+    get:
+      tags:
+        - Entitlement
+      summary: Get all entitlements
+      description: 'Get all entitlements'
+      operationId: getEntitlements
+      responses:
+        '200':
+          description: 'Success - list of all Entitlements'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entitlement'
+        '400':
+          description: 'Bad request - request failed'
+    post:
+      tags:
+        - Entitlement
+      summary: Create new entitlement resource
+      description: 'Create new entitlement resource'
+      operationId: createEntitlement
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for Entitlement creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for Entitlemement creation'
+          schema:
+            type: string
+            example: 'user'
+      requestBody:
+        description: 'Content to create new entitlement resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entitlement'
+      responses:
+        '201':
+          description: 'Success - Entitlement created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entitlement'
+        '400':
+          description: 'Bad request - Entitlement not created'
+  /entitlement/{id}:
+    get:
+      tags:
+        - Entitlement
+      summary: Get entitlement by Id
+      description: 'Get entitlement by Id'
+      operationId: getEntitlementById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Entitlement found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entitlement'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - Entitlement
+      summary: Update entitlement by Id
+      description: 'Update entitlement by Id'
+      operationId: updateEntitlementById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent entitlement by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entitlement'
+      responses:
+        '200':
+          description: 'Success - Entitlement updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entitlement'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - Entitlement
+      summary: Update entitlement value(s) by Entitlement Id
+      description: 'Update entitlement value(s) by Entitlement Id'
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existing entitlement by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - Entitlement value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entitlement'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - Entitlement
+      summary: Delete entitlement by Id
+      description: 'Delete entitlement by Id'
+      operationId: deleteEntitlementById
+      parameters:
+        - name: id
+          in: path
+          description: 'The entitlement Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Entitlement deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'         
+  /application:
+    get:
+      tags:
+        - Application
+      summary: Get all applications
+      description: 'Get all applications'
+      operationId: getApplications
+      responses:
+        '200':
+          description: Success - list of all Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+        '400':
+          description: 'Bad request - request failed'
+    post:
+      tags:
+        - Application
+      summary: Create new application
+      description: 'Create new application resource'
+      operationId: createApplication
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for Application creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for Application creation'
+          schema:
+            type: string
+            example: 'account'
+      requestBody:
+        description: 'Content to create new application resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Application'
+      responses:
+        '201':
+          description: 'Success - Application created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: 'Bad request - Application not created'
+  /application/{id}:
+    get:
+      tags:
+        - Application
+      summary: Get application by Id
+      description: 'Get application by Id'
+      operationId: getApplicationById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Application found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - Application
+      summary: Update application by Id
+      description: 'Update application by Id'
+      operationId: updateApplicationById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that needs to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existing application by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Application'
+      responses:
+        '200':
+          description: 'Success - Application updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - Application
+      summary: Update application value(s) by Application Id
+      description: 'Update application value(s) by Application Id'
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that needs to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent application by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - Application value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - Application
+      summary: Delete application by Id
+      description: 'Delete application by Id'
+      operationId: deleteApplicationById
+      parameters:
+        - name: id
+          in: path
+          description: 'The application Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Application deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'        
+  /account:
+    get:
+      tags:
+        - Account
+      summary: Get all accounts
+      description: 'Get all accounts'
+      operationId: getAccounts
+      responses:
+        '200':
+          description: 'Success - list of all Accounts'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        '400':
+          description: 'Bad request - request failed'
+    post:
+      tags:
+        - Account
+      summary: Create new account resource
+      description: 'Create new account resource'
+      operationId: createAccount
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for Account creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for Account creation'
+          schema:
+            type: string
+            example: 'user'
+      requestBody:
+        description: 'Content to create new account resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '201':
+          description: 'Success - Account created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: 'Bad request - Account not created'
+  /account/{id}:
+    get:
+      tags:
+        - Account
+      summary: Get account by Id
+      description: 'Get account by Id'
+      operationId: getAccountById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Account found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - Account
+      summary: Update account by Id
+      description: 'Update account by Id'
+      operationId: updateAccountById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that needs to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent user by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '200':
+          description: 'Success - Account updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - Account
+      summary: Update account value(s) by Account Id
+      description: 'Update account value(s) by Account Id'
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent account by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - Account value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - Account
+      summary: Delete account by Id
+      description: 'Delete account by Id'
+      operationId: deleteAccountById
+      parameters:
+        - name: id
+          in: path
+          description: 'The account Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Account deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'        
+  /group:
+    get:
+      tags:
+        - Group
+      summary: Get all groups
+      description: 'Get all groups'
+      operationId: getGroups
+      responses:
+        '200':
+          description: 'Success - list of all Group'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '400':
+          description: 'Bad request - request failed'
+    post:
+      tags:
+        - Group
+      summary: Create new group resource
+      description: 'Create new group resource'
+      operationId: createGroup
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for Group creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for Group creation'
+          schema:
+            type: string
+            example: 'user'
+      requestBody:
+        description: 'Content to create new group resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '201':
+          description: 'Success - Group created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: 'Bad request - Group not created'
+  /group/{id}:
+    get:
+      tags:
+        - Group
+      summary: Get group by Id
+      description: 'Get group by Id'
+      operationId: getGroupById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Group found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - Group
+      summary: Update group by Id
+      description: 'Update group by Id'
+      operationId: updateGroupById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that needs to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existing group by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '200':
+          description: 'Success - Group updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - Group
+      summary: Update group value(s) by Group Id
+      description: 'Update group value(s) by Group Id'
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that needs to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent role by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - Group value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - Group
+      summary: Delete group by Id
+      description: 'Delete group by Id'
+      operationId: deleteGroupById
+      parameters:
+        - name: id
+          in: path
+          description: 'The group Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Group deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'          
+  /Schemas:
+    get:
+      tags:
+        - Schema
+      summary: Get all schemas
+      description: 'Get all schemas'
+      operationId: getSchemas
+      responses:
+        '200':
+          description: Returns all Schema resources.
+          content:
+            application/json:
+              schema:
+                properties:
+                  totalResults:
+                    description: Number of Schemas returned.
+                    type: integer
+                  schemas:
+                    type: array
+                    items:
+                      type: string
+                  Resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Schema'
+            application/scim+json:
+              schema:
+                properties:
+                  totalResults:
+                    description: Number of Schemas returned.
+                    type: integer
+                  schemas:
+                    type: array
+                    items:
+                      type: string
+                  Resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Schema'
+  /Schemas/{id}:
+    get:
+      tags:
+        - Schema
+      summary: Returns a Schema based on id
+      description: >-
+        The Schema with the matching id is returned. The id is the URN of the
+        SCIM resource. The 'attributes' field holds the schema-specific
+        attributes which differ depending on Schema type.
+      operationId: getSchemaById
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          description: The id of the Schema.
+          required: true
+      responses:
+        '200':
+          description: Returns a single Schema based on the id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+  /ServiceProviderConfig:
+    description: Schema for representing the service provider's configuration
+    get:
+      operationId: ServiceProviderConfig
+      tags:
+        - ServiceProviderConfig
+      summary: Returns all ServiceProviderConfig resources.
+      description: >
+        This endpoint returns all ServiceProviderConfig resources. <br /><br />
+
+        Attributes to include in the response can be specified with the
+        'attributes' query parameter. <br /><br />
+
+        Attributes to exclude from the response can be specified with the
+        'excludedAttributes' query parameter. <br /><br />
+
+        The schema related to ServiceProviderConfig is: <br />
+
+        - **urn:ietf:params:scim:schemas:sailpoint:2.0:ServiceProviderConfig**
+      responses:
+        '200':
+          description: Returned all SCIM resources for this endpoint.
+          content:
+            application/json:
+              schema:
+                properties:
+                  totalResults:
+                    description: Number of resources returned for this endpoint.
+                    type: integer
+                    example: 1,
+                  startIndex:
+                    description: >-
+                      The starting index of the resource set list. Can be
+                      specified with startIndex query parameter.
+                    type: integer
+                    example: 1
+                  schemas:
+                    description: SCIM Schema used for response.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:scim:api:messages:2.0:ListResponse
+                  Resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceProviderConfig'
+            application/scim+json:
+              schema:
+                properties:
+                  maxResults:
+                    description: Number of ServiceProviderConfig resources returned.
+                    type: integer
+                    example: 1500,
+                  supported:
+                    type: boolean
+                    example: true
+                  schemas:
+                    description: SCIM Schema used for response.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:scim:api:messages:2.0:ListResponse
+                  Resources:
+                    description: The SCIM resources returned for this endpoint.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceProviderConfig'
+  /ResourceTypes:
+    get:
+      operationId: getResourceTypes
+      tags:
+        - ResourceTypes
+      summary: Returns all ResourceType resources.
+      description: >-
+        All ResourceType resources are listed in the response. The common fields
+        for each ResourceType entry are 'endpoint', 'id', 'name', 'description',
+        'schema' and 'schemaExtensions'.
+      responses:
+        '200':
+          description: Returns all ResourceType resources.
+          content:
+            application/json:
+              schema:
+                properties:
+                  totalResults:
+                    description: Number of ResourceType resources returned.
+                    type: integer
+                    example: 18
+                  schemas:
+                    description: >-
+                      The ResourceTypes type represented by URN used for this
+                      response.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:scim:api:messages:2.0:ListResponse
+                  Resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResourceType'
+            application/scim+json:
+              schema:
+                properties:
+                  totalResults:
+                    description: Number of Schema resources returned.
+                    type: integer
+                    example: 18
+                  schemas:
+                    description: The Schema type represented by URN used for this response.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:scim:api:messages:2.0:ListResponse
+                  Resources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResourceType'
+  /ResourceTypes/{id}:
+    get:
+      operationId: getResourceTypeById
+      tags:
+        - ResourceTypes
+      summary: Returns a ResourceType resource based on ID.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          description: ID of ResourceType resource.
+          required: true
+      responses:
+        '200':
+          description: Returns a single ResourceType resource based on the ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceType'
+components:
+  schemas:
+  #Schemas Patch operation
+    PatchBody:
+      type: array
+      items:
+        $ref: "#/components/schemas/PatchDocument"
+    PatchDocument:
+      type: object
+      description: A JSONPatch document as defined by RFC 6902
+      required:
+       - op
+       - path
+       #- value
+      properties: 
+        op: 
+          type: string 
+          description: The operation to be performed 
+          enum:
+            - add
+            - remove
+            - replace
+        path: 
+          type: string 
+          description: A JSON-Pointer 
+        value: 
+          type: object 
+          description: The value to be used within the operations.
+        #from: 
+          #type: string 
+          #description: A string containing a JSON Pointer value.
+  #Base Schema: Resource
+    Resource:
+      type: object
+      properties:
+        schemas:
+          description: The schema(s) involved in the SCIM resource.
+          type: array
+          items:
+            type: string
+        id:
+          description: unique identifier for a SCIM resource
+          type: string
+          format: uuid
+        externalId:
+          description: an identifier for the resource
+          type: string
+          format: uuid
+        name:
+          description: displayname of SCIM resource
+          type: string
+        meta:
+          description: Metadata of the resource.
+          properties:
+            resourceType:
+              description: The SCIM resource type.
+              type: string
+              #$ref: '#/components/schemas/ResourceType'
+            created:
+              description: Datetime this resource was created.
+              type: string
+              format: date-time
+              example: '2022-02-11T01:34:04.074-05:00'
+            lastModified:
+              description: Datetime the resource was last modified.
+              type: string
+              format: date-time
+              example: '2022-02-11T01:08:45.866-05:00'
+            version:
+              description: The version of the resource.
+              type: string
+            location:
+              description: The location of the resource.
+              type: string
+              format: link
+              example: 'https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646'
+      required:
+        - id
+        #- externalId
+        #- name
+        - meta
+        - schemas
+  #Base Schema for Assignments: Assignment
+    Assignment:
+      description: Parent Assignment schema.
+      type: object
+      properties:
+        #link: 
+          #type: string
+          #format: url
+        Resource:
+          $ref: '#/components/schemas/Resource'
+  #Assignments:
+    RoleUserAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+      #properties:
+        #valid_until: 
+          #type: string
+          #format: date-time
+    RoleEntitlementAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    RoleRoleAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    EntitlementUserAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    EntitlementEntitlementAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    EntitlementApplicationAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    ApplicationAccountAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    UserGroupAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    UserAccountAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    GroupGroupAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+  #Schemas of Ressource-Types:
+  #User:
+    User:
+      allOf:
+        #description: use all attributes of schema Resource
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        #description: all properties of SCIM User resource
+        #firstName:
+          #description: first name of User
+          #type: string
+        #lastName:
+          #description: last name of User
+          #type: string
+        Groups:
+          description: User to Group assignment, displayed as Group-arry in SCIM User resource
+          type: array
+          items: 
+            $ref: '#/components/schemas/UserGroupAssignment'
+        Roles:
+          description: User to Role assignment, displayed as Role-arry in SCIM User resource
+          type: array
+          items: 
+            $ref: '#/components/schemas/RoleUserAssignment'
+        Entitlements:
+          description: User to Entitlement assignment, displayed as Entitlement-arry in SCIM User resource
+          type: array
+          items: 
+            $ref: '#/components/schemas/EntitlementUserAssignment'
+        Accounts:
+          description: User to Account assignment, displayed as Account-arry in SCIM User resource
+          type: array
+          items: 
+            $ref: '#/components/schemas/UserAccountAssignment'
+  #Role
+    Role:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        User:
+          type: array
+          items: 
+            $ref: '#/components/schemas/RoleUserAssignment'
+        Entitlements:
+          type: array
+          items: 
+            $ref: '#/components/schemas/RoleEntitlementAssignment'
+        Roles:
+          type: array
+          items: 
+            $ref: '#/components/schemas/RoleRoleAssignment'
+      xml:
+        name: role
+  #Entitlements:
+    Entitlement:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        Roles:
+          type: array
+          items: 
+            $ref: '#/components/schemas/RoleEntitlementAssignment'
+        User:
+          type: array
+          items: 
+            $ref: '#/components/schemas/EntitlementUserAssignment'
+        Application:
+          type: object
+          items:
+            $ref: '#/components/schemas/EntitlementApplicationAssignment'
+        Entitlement:
+          type: array
+          items: 
+            $ref: '#/components/schemas/EntitlementEntitlementAssignment'
+      xml:
+        name: entitlement
+  #Application:
+    Application:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        Entitlements:
+          type: array
+          items: 
+            $ref: '#/components/schemas/EntitlementApplicationAssignment'
+        Accounts:
+          type: array
+          items: 
+            $ref: '#/components/schemas/ApplicationAccountAssignment'
+      xml:
+        name: application
+  #Account:
+    Account:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        User:
+          type: object #Klärung
+          items: 
+            $ref: '#/components/schemas/UserAccountAssignment'
+        Application:
+          type: object
+          items: 
+            $ref: '#/components/schemas/ApplicationAccountAssignment'
+      xml:
+        name: account
+  #Group:
+    Group:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        User:
+          type: array
+          items: 
+            $ref: '#/components/schemas/UserGroupAssignment'
+        Groups:
+          type: array
+          items: 
+            $ref: '#/components/schemas/GroupGroupAssignment'
+      xml:
+        name: group
+  #SCIM defined statdard Schemas:  
+  #Ressource Typ:
+    ResourceType:
+      description: specifies the metadata about a ResourceType
+      type: object
+      properties:
+        id:
+          description: ID of the ResourceType.
+          type: string
+          format: uuid
+        name:
+          description: The resource type name.
+          type: string
+        description:
+          #descripton: Description of ResourceType
+          type: string
+        endpoint:
+          description: resource type’s HTTP-addressable endpoint relative to the Base URL of the service provider
+          type: string
+          example: /User
+        schema:
+          description: The primary/base schema URI of the ResourceType.
+          type: array
+          items:
+            type: string
+            #$ref: '#/components/schemas/Schema'
+            example:
+              urn:ietf:params:scim:schemas:core:2.0:User
+        schemaExtensions:
+          description: The extension schema URI of the ResourceType.
+          type: array
+          items:
+            type: string
+            example:
+              Schema: urn:ietf:params:scim:schemas:extension:enterprise:2.0:User
+              required: true
+  #Schema:
+    Schema:
+      description: specify the schema in use by resources available and accepted by a SCIM service provider
+      type: object
+      properties:
+        id:
+          description: The id of the Schema. The id is the SCIM URN of the Schema.
+          type: string
+          example: "urn:ietf:params:scim:schemas:core:2.0:User"
+        name:
+          description: Name of the Schema.
+          type: string
+          example: User
+        description:
+          description: DHuman readable description of the Schema.
+          type: string
+        attributes:
+          description: Attributes used to describe this Schema.
+          type: array
+          items:
+            properties:
+              name:
+                description: Name of the attribute.
+                type: string
+              type:
+                description: The attribute’s data type
+                type: string
+                example: string
+              subAttributes:
+                description: defines a set of sub-attributes if complex attribute
+                type: array
+                items:
+                  additionalProperties:
+                    anyOf:
+                      - type: object
+              multiValued:
+                description: Describes whether this attribute is allowed multiple values.
+                type: boolean
+              description:
+                description: Description of the attribute.
+                type: string
+              required:
+                description: specifies whether or not the attribute is required
+                type: boolean
+                example: false
+              canonicalValues:
+                description: collection of suggested canonical values that MAY be used
+                type: array
+                items:
+                  type: string
+                example:
+                  - work
+                  - home
+              caseExact:
+                description: True if attribute value is case-sensitive; false otherwise.
+                type: boolean
+                example: true
+              mutability:
+                description: circumstances under which the value of the attribute can be (re)defined
+                type: string
+                example: readOnly, redWrite, immutable, writeOnly
+              returned:
+                description:  indicates when an attribute and associated values are returned in response to HTTP Method
+                type: string
+                example: default, always, never, request
+              uniqueness:
+                description: how the service provider enforces uniqueness of attribute values
+                type: string
+                example: none, server, global
+        meta:
+          description: Metadata of the Schema.
+          type: object
+          properties:
+            location:
+              description: The location of the Schema.
+              type: string
+              example: >-
+                http://localhost:8080/iiq/scim/v2/Schemas/7f0123417e941b00007f9db3702906cb
+            version:
+              description: The version of the Schema.
+              type: string
+              example: W"1647617443639"
+            resourceType:
+              description: The SCIM resource type.
+              type: string
+              example: Schema
+        schemas:
+          description: The schema for the Schema resource.
+          type: array
+          items:
+            type: string
+          example:
+            - urn:ietf:params:scim:schemas:core:2.0:Schema
+    ServiceProviderConfig:
+      required:
+        - patch
+        - etag
+        - bulk
+        - filter
+        - changePassword
+        - sort
+        - authenticationSchemes
+      properties:
+        documentationUri:
+          type: string
+        patch:
+          description: A complex type that specifies PATCH configuration options.
+          type: object
+          required:
+            - supported
+          properties:
+            supported:
+              type: boolean
+              description: Boolean value specifying whether the operation is supported.
+              example: false
+        etag:
+          description: A complex type that specifies ETAG configuration options.
+          type: object
+          required:
+            - supported
+          properties:
+            supported:
+              description: Boolean value specifying whether the operation is supported.
+              type: boolean
+        bulk:
+          description: A complex type that specifies ETAG configuration options.
+          type: object
+          required:
+            - supported
+            - maxOperations
+            - maxPayloadSize
+          properties:
+            supported:
+              description: Boolean value specifying whether the operation is supported.
+              type: boolean
+              example: false
+            maxOperations:
+              description: An integer value specifying the maximum number of operations.
+              type: integer
+              example: 3
+            maxPayloadSize:
+              description: An integer value specifying the maximum payload size in bytes.
+              type: integer
+              example: 128
+        filter:
+          description: A complex type that specifies FILTER options.
+          type: object
+          required:
+            - supported
+            - maxResults
+          properties:
+            supported:
+              description: Boolean value specifying whether the operation is supported.
+              type: boolean
+              example: true
+            maxResults:
+              description: >-
+                Integer value specifying the maximum number of resources
+                returned in a response.
+              type: integer
+              example: 10
+        changePassword:
+          description: A complex type that specifies change password options.
+          type: object
+          required:
+            - supported
+          properties:
+            supported:
+              description: Boolean value specifying whether the operation is supported.
+              type: boolean
+              example: false
+        sort:
+          description: A complex type that specifies sort result options.
+          type: object
+          required:
+            - supported
+          properties:
+            supported:
+              description: Boolean value specifying whether the operation is supported.
+              type: boolean
+              example: false
+        authenticationSchemes:
+          description: >-
+            A complex type that specifies supported Authentication Scheme
+            properties.
+          type: object
+          required:
+            - name
+            - description
+            - type
+          properties:
+            name:
+              description: The common authentication scheme name; e.g., HTTP Basic.
+              type: string
+              example: HTTP Basic
+            description:
+              description: A description of the authentication scheme.
+              type: string
+              example: Authentication Scheme using the Http Basic Standard.
+            specUri:
+              description: >-
+                An HTTP addressable URL pointing to the Authentication Scheme's
+                specification.
+              type: string
+              example: http://www.ietf.org/rfc/rfc2617.txt
+            documentationUri:
+              description: >-
+                An HTTP addressable URL pointing to the Authentication Scheme's
+                usage documentation.
+              type: string
+              example: >-
+                https://community.sailpoint.com/community/identityiq/product-downloads
+            type:
+              type: string
+              description: The authentication scheme.
+              enum:
+                - oauth
+                - oauth2
+                - oauthbearertoken
+                - httpbasic
+                - httpdigest
+              example: oauthbearertoken
+        meta:
+          type: object
+          properties:
+            location:
+              type: string
+              description: URL to ServiceProviderConfig resource.
+              example: http://localhost:8080/identityiq/scim/v2/ServiceProviderConfig
+            resourceType:
+              type: string
+              description: Resource type of the metadata subject.
+              example: ServiceProviderConfig
+
+    ApiObjectResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+    ApiArrayResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        list:
+          type: array
+          items: 
+           $ref: '#/components/schemas/Resource'
+  
+  
+  #Bodys:
+  #requestBodies:
+    #UserArray:
+      #description: List of user object
+      #content:
+        #application/json:
+          #schema:
+            #type: array
+            #items:
+              #$ref: '#/components/schemas/User'
+    #PatchBody:
+      #content:
+        #application/json:
+          #schema:
+            #$ref: '#/components/schemas/PatchBody'
+  
+  #Security
+  securitySchemes:
+    scim_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://testURL.com/oauth/authorize
+          scopes:
+            write:obj: modify
+            read:obj: read
+    #api_key:
+      #type: apiKey
+      #name: api_key
+      #in: header
