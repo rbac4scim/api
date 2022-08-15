@@ -33,6 +33,16 @@ tags:
     description: 'HTTP operations with Account resource(s)'
   - name: Application
     description: 'HTTP operations with Application resource(s)'
+  - name: SoD
+    description: 'HTTP operations with SoD resource(s)'
+    externalDocs:
+      description: 'Full SoD documentation @'
+      url: 'https://profsandhu.com/cs5323_s17/sandhu-1998.pdf'
+  - name: Session
+    description: 'HTTP operations with Session resource(s)'
+    externalDocs:
+      description: 'Full seesion documentation @'
+      url: 'https://profsandhu.com/cs5323_s17/sandhu-1998.pdf'
   - name: Schema
     description: 'HTTP operations with Schema resource(s)'
     externalDocs:
@@ -48,7 +58,6 @@ tags:
     externalDocs:
       description: 'Full documentaion @'
       url: 'https://datatracker.ietf.org/doc/html/rfc7643'
-  
 paths:
   /user:
     get:
@@ -68,9 +77,9 @@ paths:
                   $ref: '#/components/schemas/User'
         '400':
           description: 'Bad request - request failed'
-      security:
-        - scim_auth:
-            - read:obj
+      #security:
+        #- scim_auth:
+            #- read:obj
     post:
       tags:
         - User
@@ -1038,6 +1047,342 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'          
+  /sod:
+    get:
+      tags:
+        - SoD
+      summary: Get all SoDs
+      description: 'Get all sods'
+      operationId: getSoDs
+      responses:
+        '200':
+          description: 'Success - list of all SoDs'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SoD'
+        '400':
+          description: 'Bad request - request failed'
+      #security:
+        #- scim_auth:
+            #- read:obj
+    post:
+      tags:
+        - SoD
+      summary: Create new SoD resource
+      description: 'Create new SoD resource'
+      operationId: createSoD
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for SoD creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for SoD creation'
+          schema:
+            type: string
+            example: 'Allowlist'
+      requestBody:
+        description: 'Content to create new SoD resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoD'
+      responses:
+        '201':
+          description: 'Success - SoD created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoD'
+        '400':
+          description: 'Bad request - SoD not created'
+  /sod/{id}:
+    get:
+      tags:
+        - SoD
+      summary: Get SoD by Id
+      description: 'Get SoD by Id'
+      operationId: getSoDById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - SoD found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoD'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - SoD
+      summary: Update SoD by Id
+      description: 'Update SoD by Id'
+      operationId: updateSoDById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent user by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoD'
+      responses:
+        '200':
+          description: 'Success - SoD updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoD'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - SoD
+      summary: Update SoD value(s) by SoD Id
+      description: 'Update SoD value(s) by SoD Id'
+      operationId: patchSoDById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent SoD by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - SoD value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoD'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - SoD
+      summary: Delete SoD by Id
+      description: 'Delete SoD by Id'
+      operationId: deleteSoDByID
+      parameters:
+        - name: id
+          in: path
+          description: 'The SoD Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - SoD deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+  /seesion:
+    get:
+      tags:
+        - Session
+      summary: Get all Sessions
+      description: 'Get all Sessions'
+      operationId: getSessions
+      responses:
+        '200':
+          description: 'Success - list of all Sessions'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+        '400':
+          description: 'Bad request - request failed'
+      #security:
+        #- scim_auth:
+            #- read:obj
+    post:
+      tags:
+        - Session
+      summary: Create new Session resource
+      description: 'Create new Session resource'
+      operationId: createSession
+      parameters:
+        - in: query
+          name: attributes
+          description: 'Attributes for Session creation'
+          schema:
+            type: string
+            example: 'name'
+        - in: query
+          name: excludedAttributes
+          description: 'Excluded attributes for Session creation'
+          schema:
+            type: string
+            example: 'User'
+      requestBody:
+        description: 'Content to create new Session resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: 'Success - Session created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: 'Bad request - Session not created'
+  /session/{id}:
+    get:
+      tags:
+        - Session
+      summary: Get Session by Id
+      description: 'Get Session by Id'
+      operationId: getSessionById
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Session found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+    put:
+      tags:
+        - Session
+      summary: Update Session by Id
+      description: 'Update Session by Id'
+      operationId: updateSessionById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent Session by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '200':
+          description: 'Success - Session updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    patch:
+      tags:
+        - Session
+      summary: Update Session value(s) by User Id
+      description: 'Update Session value(s) by User Id'
+      operationId: patchSessionById
+      parameters:
+        - name: id
+          in: path
+          description: 'Id that need to be updated'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: 'Content for updating an existent Session by Id'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBody'
+      responses:
+        '200':
+          description: 'Success - Session value(s) updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: 'Bad request - Invalid parameter(s) supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
+        '409':
+          description: 'Conflict - request could not be completed'
+    delete:
+      tags:
+        - Session
+      summary: Delete Session by Id
+      description: 'Delete Session by Id'
+      operationId: deleteSessionByID
+      parameters:
+        - name: id
+          in: path
+          description: 'The Session Id that needs to be deleted'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Success - Session deleted'
+        '400':
+          description: 'Bad request - Invalid Id supplied'
+        '404':
+          description: 'Not found - no resource with provided Id'
   /Schemas:
     get:
       tags:
@@ -1292,8 +1637,11 @@ components:
           description: an identifier for the resource
           type: string
           format: uuid
-        name:
-          description: displayname of SCIM resource
+        displayName:
+          description: displayName of SCIM resource
+          type: string
+        type:
+          description: an additional type desription od a resource
           type: string
         meta:
           description: Metadata of the resource.
@@ -1350,7 +1698,10 @@ components:
     RoleRoleAssignment:
       allOf:
         - $ref: '#/components/schemas/Assignment'
-    EntitlementUserAssignment:
+    #EntitlementUserAssignment:
+      #allOf:
+        #- $ref: '#/components/schemas/Assignment'
+    EntitlementAccountAssignment:
       allOf:
         - $ref: '#/components/schemas/Assignment'
     EntitlementEntitlementAssignment:
@@ -1371,7 +1722,66 @@ components:
     GroupGroupAssignment:
       allOf:
         - $ref: '#/components/schemas/Assignment'
+    SoDRoleAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SoDEntitlementAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SoDAccountAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SoDUserAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SoDGroupAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SessionRoleAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SessionEntitlementAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
+    SessionUserAssignment:
+      allOf:
+        - $ref: '#/components/schemas/Assignment'
   #Schemas of Ressource-Types:
+  #SoD
+    SoD:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        Exclusions: 
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SoDRoleAssignment'
+              - $ref: '#/components/schemas/SoDEntitlementAssignment'
+        Allowlist: 
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SoDAccountAssignment'
+              - $ref: '#/components/schemas/SoDUserAssignment'
+              - $ref: '#/components/schemas/SoDGroupAssignment'
+      xml:
+        name: sod
+  #Session
+    Session:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+      properties:
+        Active: 
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SessionRoleAssignment'
+              - $ref: '#/components/schemas/SessionEntitlementAssignment'
+        User:
+          $ref: '#/components/schemas/SessionUserAssignment'
+      xml:
+        name: session
   #User:
     User:
       allOf:
@@ -1395,22 +1805,32 @@ components:
           type: array
           items: 
             $ref: '#/components/schemas/RoleUserAssignment'
-        Entitlements:
-          description: User to Entitlement assignment, displayed as Entitlement-arry in SCIM User resource
-          type: array
-          items: 
-            $ref: '#/components/schemas/EntitlementUserAssignment'
+        #Entitlements:
+          #description: User to Entitlement assignment, displayed as Entitlement-arry in SCIM User resource
+          #type: array
+          #items: 
+            #$ref: '#/components/schemas/EntitlementUserAssignment'
         Accounts:
           description: User to Account assignment, displayed as Account-arry in SCIM User resource
           type: array
           items: 
             $ref: '#/components/schemas/UserAccountAssignment'
+        AllowlistSoDs:
+          description: tbd
+          type: array
+          items:
+            $ref: '#/components/schemas/SoDUserAssignment'
+        Sessions:
+          description: tbd
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionUserAssignment'
   #Role
     Role:
       allOf:
         - $ref: '#/components/schemas/Resource'
       properties:
-        User:
+        Users:
           type: array
           items: 
             $ref: '#/components/schemas/RoleUserAssignment'
@@ -1433,13 +1853,15 @@ components:
           type: array
           items: 
             $ref: '#/components/schemas/RoleEntitlementAssignment'
-        User:
+        #User:
+          #type: array
+          #items: 
+            #$ref: '#/components/schemas/EntitlementUserAssignment'
+        Accounts:
           type: array
           items: 
-            $ref: '#/components/schemas/EntitlementUserAssignment'
+            $ref: '#/components/schemas/EntitlementAccountAssignment'
         Application:
-          type: object
-          items:
             $ref: '#/components/schemas/EntitlementApplicationAssignment'
         Entitlement:
           type: array
@@ -1468,13 +1890,21 @@ components:
         - $ref: '#/components/schemas/Resource'
       properties:
         User:
-          type: object #Klärung
-          items: 
             $ref: '#/components/schemas/UserAccountAssignment'
         Application:
           type: object
           items: 
             $ref: '#/components/schemas/ApplicationAccountAssignment'
+        Entitlements:
+          description: Account to Entitlement assignment, displayed as Entitlement-arry in SCIM Account resource
+          type: array
+          items: 
+            $ref: '#/components/schemas/EntitlementAccountAssignment'
+        AllowlistSoDs:
+          description: tbd
+          type: array
+          items:
+            $ref: '#/components/schemas/SoDAccountAssignment'
       xml:
         name: account
   #Group:
@@ -1490,6 +1920,13 @@ components:
           type: array
           items: 
             $ref: '#/components/schemas/GroupGroupAssignment'
+        AllowlistSoDs:
+          description: tbd
+          type: array
+          items:
+            $ref: '#/components/schemas/SoDGroupAssignment'
+      required:
+        - displayName
       xml:
         name: group
   #SCIM defined statdard Schemas:  
@@ -1809,12 +2246,18 @@ components:
     scim_auth:
       type: oauth2
       flows:
-        implicit:
+        authorizationCode:
+          tokenUrl: https://testURL.com/oauth/authorize
           authorizationUrl: https://testURL.com/oauth/authorize
           scopes:
-            write:obj: modify
-            read:obj: read
+            write_obj: modify objects
+            read_obj: read objects
     #api_key:
       #type: apiKey
       #name: api_key
       #in: header
+      
+security: 
+  - scim_auth: 
+    - write_obj
+    - read_obj
