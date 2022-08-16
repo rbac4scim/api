@@ -59,27 +59,72 @@ tags:
       description: 'Full documentaion @'
       url: 'https://datatracker.ietf.org/doc/html/rfc7643'
 paths:
-  /user:
+  /User:
     get:
       tags:
         - User
       summary: Get all users
       description: 'Get all users'
       operationId: getUsers
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+            example: user.value eq 7f000001804444fe818051b44414444c and displayName sw G
+          description: 'Allows for query filters'
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: displayName
+          description: 'Allows sorting the results by a resources attributes.'
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            example: descending
+            default: ascending
+          description: 'Determines what order to sort results in.'
+        - in: query
+          name: startIndex
+          schema:
+            type: integer
+            example: 2313
+            default: 1
+          description: 'Determines the starting index of the result set.'
+        - in: query
+          name: count
+          schema:
+            type: integer
+            example: 10
+            default: 1000
+          description: 'Specifies the number of results per page.'
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to return in the response. This query parameter supersedes excludedAttributes, so providing the same attribute(s) to both will result in the attribute(s) being returned.'
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to exclude from the response. Some attributes cannot be excluded.'
       responses:
         '200':
           description: 'Success - list of all Users'
           content:
             application/json:
               schema:
-                type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/ListResponse'
         '400':
           description: 'Bad request - request failed'
-      #security:
-        #- scim_auth:
-            #- read:obj
+      security:
+        - rbac_scim_auth:
+            - read:users
     post:
       tags:
         - User
@@ -88,33 +133,70 @@ paths:
       operationId: createUser
       parameters:
         - in: query
-          name: attributes
-          description: 'Attributes for User creation'
+          name: filter
           schema:
             type: string
-            example: 'name'
+            example: user.value eq 7f000001804444fe818051b44414444c and displayName sw G
+          description: 'Allows for query filters'
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: displayName
+          description: 'Allows sorting the results by a resources attributes.'
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            example: descending
+            default: ascending
+          description: 'Determines what order to sort results in.'
+        - in: query
+          name: startIndex
+          schema:
+            type: integer
+            example: 2313
+            default: 1
+          description: 'Determines the starting index of the result set.'
+        - in: query
+          name: count
+          schema:
+            type: integer
+            example: 10
+            default: 1000
+          description: 'Specifies the number of results per page.'
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to return in the response. This query parameter supersedes excludedAttributes, so providing the same attribute(s) to both will result in the attribute(s) being returned.'
         - in: query
           name: excludedAttributes
-          description: 'Excluded attributes for User creation'
           schema:
             type: string
-            example: 'groups'
+            example: displayName,active
+          description: 'A comma-separated list of attributes to exclude from the response. Some attributes cannot be excluded.'
       requestBody:
         description: 'Content to create new user resource'
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/user'
       responses:
         '201':
           description: 'Success - User created'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/user'
         '400':
           description: 'Bad request - User not created'
-  /user/{id}:
+      security:
+        - rbac_scim_auth:
+            - read:users
+            - create:users
+  /User/{id}:
     get:
       tags:
         - User
@@ -129,17 +211,65 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: filter
+          schema:
+            type: string
+            example: user.value eq 7f000001804444fe818051b44414444c and displayName sw G
+          description: 'Allows for query filters'
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: displayName
+          description: 'Allows sorting the results by a resources attributes.'
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            example: descending
+            default: ascending
+          description: 'Determines what order to sort results in.'
+        - in: query
+          name: startIndex
+          schema:
+            type: integer
+            example: 2313
+            default: 1
+          description: 'Determines the starting index of the result set.'
+        - in: query
+          name: count
+          schema:
+            type: integer
+            example: 10
+            default: 1000
+          description: 'Specifies the number of results per page.'
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to return in the response. This query parameter supersedes excludedAttributes, so providing the same attribute(s) to both will result in the attribute(s) being returned.'
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to exclude from the response. Some attributes cannot be excluded.'
       responses:
         '200':
           description: 'Success - User found'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/user'
         '400':
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'
+      security:
+        - rbac_scim_auth:
+            - read:users
     put:
       tags:
         - User
@@ -154,25 +284,75 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: filter
+          schema:
+            type: string
+            example: user.value eq 7f000001804444fe818051b44414444c and displayName sw G
+          description: 'Allows for query filters'
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: displayName
+          description: 'Allows sorting the results by a resources attributes.'
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            example: descending
+            default: ascending
+          description: 'Determines what order to sort results in.'
+        - in: query
+          name: startIndex
+          schema:
+            type: integer
+            example: 2313
+            default: 1
+          description: 'Determines the starting index of the result set.'
+        - in: query
+          name: count
+          schema:
+            type: integer
+            example: 10
+            default: 1000
+          description: 'Specifies the number of results per page.'
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to return in the response. This query parameter supersedes excludedAttributes, so providing the same attribute(s) to both will result in the attribute(s) being returned.'
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to exclude from the response. Some attributes cannot be excluded.'
       requestBody:
         description: 'Content for updating an existent user by Id'
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/user'
       responses:
         '200':
           description: 'Success - User updated'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/user'
         '400':
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'
         '409':
           description: 'Conflict - request could not be completed'
+      security:
+        - rbac_scim_auth:
+            - read:users
+            - create:users
+            - delete:users
     patch:
       tags:
         - User
@@ -187,6 +367,51 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: filter
+          schema:
+            type: string
+            example: user.value eq 7f000001804444fe818051b44414444c and displayName sw G
+          description: 'Allows for query filters'
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: displayName
+          description: 'Allows sorting the results by a resources attributes.'
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            example: descending
+            default: ascending
+          description: 'Determines what order to sort results in.'
+        - in: query
+          name: startIndex
+          schema:
+            type: integer
+            example: 2313
+            default: 1
+          description: 'Determines the starting index of the result set.'
+        - in: query
+          name: count
+          schema:
+            type: integer
+            example: 10
+            default: 1000
+          description: 'Specifies the number of results per page.'
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to return in the response. This query parameter supersedes excludedAttributes, so providing the same attribute(s) to both will result in the attribute(s) being returned.'
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: displayName,active
+          description: 'A comma-separated list of attributes to exclude from the response. Some attributes cannot be excluded.'
       requestBody:
         description: 'Content for updating an existent user by Id'
         content:
@@ -199,13 +424,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/user'
         '400':
           description: 'Bad request - Invalid parameter(s) supplied'
         '404':
           description: 'Not found - no resource with provided Id'
         '409':
           description: 'Conflict - request could not be completed'
+      security:
+        - rbac_scim_auth:
+            - read:users
+            - create:users
+            - update:users
     delete:
       tags:
         - User
@@ -227,7 +457,10 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'
-  /role:
+      security:
+        - rbac_scim_auth:
+            - delete:users
+  /Role:
     get:
       tags:
         - Role
@@ -242,7 +475,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Role'
+                  $ref: '#/components/schemas/ListResponse'
         '400':
           description: 'Bad request - request failed'
     post:
@@ -269,17 +502,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Role'
+              $ref: '#/components/schemas/role'
       responses:
         '201':
           description: 'Success - Role created'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Role'
+                $ref: '#/components/schemas/role'
         '400':
           description: 'Bad request - Role not created'
-  /role/{id}:
+  /Role/{id}:
     get:
       tags:
         - Role
@@ -391,7 +624,7 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'
-  /entitlement:
+  /Entitlement:
     get:
       tags:
         - Entitlement
@@ -443,7 +676,7 @@ paths:
                 $ref: '#/components/schemas/Entitlement'
         '400':
           description: 'Bad request - Entitlement not created'
-  /entitlement/{id}:
+  /Entitlement/{id}:
     get:
       tags:
         - Entitlement
@@ -555,7 +788,7 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'         
-  /application:
+  /Application:
     get:
       tags:
         - Application
@@ -607,7 +840,7 @@ paths:
                 $ref: '#/components/schemas/Application'
         '400':
           description: 'Bad request - Application not created'
-  /application/{id}:
+  /Application/{id}:
     get:
       tags:
         - Application
@@ -719,7 +952,7 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'        
-  /account:
+  /Account:
     get:
       tags:
         - Account
@@ -771,7 +1004,7 @@ paths:
                 $ref: '#/components/schemas/Account'
         '400':
           description: 'Bad request - Account not created'
-  /account/{id}:
+  /Account/{id}:
     get:
       tags:
         - Account
@@ -883,7 +1116,7 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'        
-  /group:
+  /Group:
     get:
       tags:
         - Group
@@ -935,7 +1168,7 @@ paths:
                 $ref: '#/components/schemas/Group'
         '400':
           description: 'Bad request - Group not created'
-  /group/{id}:
+  /Group/{id}:
     get:
       tags:
         - Group
@@ -1047,7 +1280,7 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'          
-  /sod:
+  /SoD:
     get:
       tags:
         - SoD
@@ -1102,7 +1335,7 @@ paths:
                 $ref: '#/components/schemas/SoD'
         '400':
           description: 'Bad request - SoD not created'
-  /sod/{id}:
+  /SoD/{id}:
     get:
       tags:
         - SoD
@@ -1215,7 +1448,7 @@ paths:
           description: 'Bad request - Invalid Id supplied'
         '404':
           description: 'Not found - no resource with provided Id'
-  /seesion:
+  /Session:
     get:
       tags:
         - Session
@@ -1270,7 +1503,7 @@ paths:
                 $ref: '#/components/schemas/Session'
         '400':
           description: 'Bad request - Session not created'
-  /session/{id}:
+  /Session/{id}:
     get:
       tags:
         - Session
@@ -1621,7 +1854,7 @@ components:
           #type: string 
           #description: A string containing a JSON Pointer value.
   #Base Schema: Resource
-    Resource:
+    resource:
       type: object
       properties:
         schemas:
@@ -1674,264 +1907,461 @@ components:
         #- name
         - meta
         - schemas
-  #Base Schema for Assignments: Assignment
-    Assignment:
+  #Base Schema: Assignment
+    assignment:
       description: Parent Assignment schema.
       type: object
       properties:
         #link: 
           #type: string
           #format: url
-        Resource:
-          $ref: '#/components/schemas/Resource'
+        resource:
+          $ref: '#/components/schemas/resource'
   #Assignments:
-    RoleUserAssignment:
+    roleUserAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
+        - $ref: '#/components/schemas/assignment'
       #properties:
         #valid_until: 
           #type: string
           #format: date-time
-    RoleEntitlementAssignment:
+    roleEntitlementAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    RoleRoleAssignment:
+        - $ref: '#/components/schemas/assignment'
+    roleRoleAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
+        - $ref: '#/components/schemas/assignment'
     #EntitlementUserAssignment:
       #allOf:
-        #- $ref: '#/components/schemas/Assignment'
-    EntitlementAccountAssignment:
+        #- $ref: '#/components/schemas/assignment'
+    entitlementAccountAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    EntitlementEntitlementAssignment:
+        - $ref: '#/components/schemas/assignment'
+    entitlementEntitlementAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    EntitlementApplicationAssignment:
+        - $ref: '#/components/schemas/assignment'
+    entitlementApplicationAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    ApplicationAccountAssignment:
+        - $ref: '#/components/schemas/assignment'
+    applicationAccountAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    UserGroupAssignment:
+        - $ref: '#/components/schemas/assignment'
+    userGroupAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    UserAccountAssignment:
+        - $ref: '#/components/schemas/assignment'
+      properties:
+        membership:
+          type: string
+          enum:
+            - direct
+            - indirect
+    userAccountAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    GroupGroupAssignment:
+        - $ref: '#/components/schemas/assignment'
+    groupGroupAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SoDRoleAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sodRoleAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SoDEntitlementAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sodEntitlementAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SoDAccountAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sodAccountAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SoDUserAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sodUserAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SoDGroupAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sodGroupAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SessionRoleAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sessionRoleAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SessionEntitlementAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sessionEntitlementAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
-    SessionUserAssignment:
+        - $ref: '#/components/schemas/assignment'
+    sessionUserAssignment:
       allOf:
-        - $ref: '#/components/schemas/Assignment'
+        - $ref: '#/components/schemas/assignment'
+    responseAssignment:
+      allOf:
+        - $ref: '#/components/schemas/assignment'
   #Schemas of Ressource-Types:
   #SoD
-    SoD:
+    sod:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        Exclusions: 
+        exclusions: 
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/SoDRoleAssignment'
-              - $ref: '#/components/schemas/SoDEntitlementAssignment'
-        Allowlist: 
+              - $ref: '#/components/schemas/sodRoleAssignment'
+              - $ref: '#/components/schemas/sodEntitlementAssignment'
+        allowList: 
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/SoDAccountAssignment'
-              - $ref: '#/components/schemas/SoDUserAssignment'
-              - $ref: '#/components/schemas/SoDGroupAssignment'
+              - $ref: '#/components/schemas/sodAccountAssignment'
+              - $ref: '#/components/schemas/sodUserAssignment'
+              - $ref: '#/components/schemas/sodGroupAssignment'
       xml:
         name: sod
   #Session
-    Session:
+    session:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        Active: 
+        active: 
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/SessionRoleAssignment'
-              - $ref: '#/components/schemas/SessionEntitlementAssignment'
-        User:
-          $ref: '#/components/schemas/SessionUserAssignment'
+              - $ref: '#/components/schemas/sessionRoleAssignment'
+              - $ref: '#/components/schemas/sessionEntitlementAssignment'
+        user:
+          $ref: '#/components/schemas/sessionUserAssignment'
       xml:
         name: session
   #User:
-    User:
+    user:
       allOf:
         #description: use all attributes of schema Resource
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
         #description: all properties of SCIM User resource
-        #firstName:
-          #description: first name of User
-          #type: string
-        #lastName:
-          #description: last name of User
-          #type: string
-        Groups:
+        userName:
+          description: service provider's unique identifier for the user
+          type: string
+        name:
+          description: name (array) of user
+          type: array
+          items:
+            properties:
+              formatted:
+                description: The full name, including all middle names, title, and suffixes as appropriate, formatted for display
+                type: string
+                example: Ms. Barbara Jane Jensen, III
+              familyName:
+                description: The family name of the User, or last name in most Western languages
+                type: string
+                example: Jensen
+              givenName:
+                description: The given name of the User, or first name in most Western languages
+                type: string
+                example: Barbara
+              middleName:
+                description: The middle name(s) of the User
+                type: string
+                example: Jane
+              honoriificPrefix:
+                description: The honorific prefix(es) of the User, or title in most Western languages
+                type: string
+                example: Ms.
+              honoriificSuffix:
+                description: The honorific suffix(es) of the User, or suffix in most Western languages
+                type: string
+                example: III
+        nickName:
+          description: nickname of user, casual way to address the user in real life
+          type: string
+          example: Bob (instead of Robert)
+        profileUrl:
+          description: URI that is a uniform resource locator and that point to a location representing the user's online profile
+          type: string
+          format: uri
+          example: https://www.linkedin.com/in/user-0875d21476/
+        title:
+          description: title of user
+          type: string
+          example: Vice President
+        preferredLanguage:
+          description: prefered written or spoken languages of user
+          type: string
+        locale:
+          description: indicate the User's default location
+          type: string
+          example: en_US
+        timezone:
+          description: general time zone of user
+          type: string
+          example: America/Los_Angeles
+        active:
+          description: Boolean value indicating the user's administrative status
+          type: boolean
+          example: true
+        password:
+          description: password of user
+          type: string
+          format: password
+        emails:
+          description: Email addresses for the User
+          type: array
+          items:
+            properties:
+              display:
+                description: the canonicalized representation of the email value
+                type: string
+                format: email
+                example: bjensen@example.com
+              type:
+                description: Type of email address (work, home, other)
+                type: string
+                example: work
+              primary:
+                description: boolean value to indicate the primary mail address
+                type: boolean
+                example: true
+        phoneNumbers:
+          description: Phone numbers for the user
+          type: array
+          items:
+            properties:
+              display:
+                description: the canonicalized representation of the phone number value
+                type: string
+                format: string
+                example: tel:+1-201-555-0123
+              type:
+                description: Type of phone numer (work, home, mobile, fax, pager, other)
+                type: string
+                example: work
+              primary:
+                description: boolean value to indicate the primary phone number
+                type: boolean
+                example: true
+        ims:
+          description: Instant messaging address for the user
+          type: array
+          items:
+            properties:
+              display:
+                description: the canonicalized representation of the ims value
+                type: string
+                format: string
+                example: teams
+              type:
+                description: Type of ims (aim, gtalk, icq, xmpp, msn, skype, qq, yahoo, other)
+                type: string
+                example: work
+              primary:
+                description: boolean value to indicate the primary ims
+                type: boolean
+                example: true
+        photos:
+          description: URI that is a uniform resource locator that points to a resource location representing the user's image
+          type: array
+          items:
+            properties:
+              display:
+                description: the URI to photo location
+                type: string
+                format: uri
+                example: https://example.com/123456/
+              type:
+                description: Type of photo (photo ,thumbnail)
+                type: string
+                example: work
+              primary:
+                description: boolean value to indicate the primary ims
+                type: boolean
+                example: true
+        addresses:
+          description: physical mailing address for this user
+          type: array
+          items:
+            properties:
+              formatted:
+                description: full mailing address, formatted for display or use with a mailing label
+                type: string
+                format: string
+                example: One Apple Park Way, Cupertino, CA 95014, US
+              streetAddress:
+                description: full street address component
+                type: string
+                example: One Apple Park Way
+              locality:
+                description: city or locality component
+                type: string
+                example: Cupertino
+              region:
+                description: state or region component
+                type: string
+                example: CA
+              postalCode:
+                description: zip code or postal code component
+                type: number
+                example: 95014
+              counrty:
+                description: country name component
+                type: number
+                example: US
+              primary:
+                description: boolean value to indicate the primary address
+                type: boolean
+                example: true
+          required:
+            - country
+        groups:
           description: User to Group assignment, displayed as Group-arry in SCIM User resource
           type: array
-          items: 
-            $ref: '#/components/schemas/UserGroupAssignment'
-        Roles:
+          items:
+            $ref: '#/components/schemas/userGroupAssignment'
+        roles:
           description: User to Role assignment, displayed as Role-arry in SCIM User resource
           type: array
           items: 
-            $ref: '#/components/schemas/RoleUserAssignment'
+            $ref: '#/components/schemas/roleUserAssignment'
         #Entitlements:
           #description: User to Entitlement assignment, displayed as Entitlement-arry in SCIM User resource
           #type: array
           #items: 
             #$ref: '#/components/schemas/EntitlementUserAssignment'
-        Accounts:
+        accounts:
           description: User to Account assignment, displayed as Account-arry in SCIM User resource
           type: array
           items: 
-            $ref: '#/components/schemas/UserAccountAssignment'
-        AllowlistSoDs:
+            $ref: '#/components/schemas/userAccountAssignment'
+        x509Certificates:
+          description: list of certificates associated with the resource
+          type: array
+          items:
+            type: string
+            format: base64
+        allowlistSoDs:
           description: tbd
           type: array
           items:
-            $ref: '#/components/schemas/SoDUserAssignment'
-        Sessions:
+            $ref: '#/components/schemas/sodUserAssignment'
+        sessions:
           description: tbd
           type: array
           items:
             $ref: '#/components/schemas/SessionUserAssignment'
+      required:
+        - userName
+      xml:
+        name: user
   #Role
-    Role:
+    role:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        Users:
+        users:
           type: array
           items: 
-            $ref: '#/components/schemas/RoleUserAssignment'
-        Entitlements:
+            $ref: '#/components/schemas/roleUserAssignment'
+        entitlements:
           type: array
           items: 
-            $ref: '#/components/schemas/RoleEntitlementAssignment'
-        Roles:
+            $ref: '#/components/schemas/roleEntitlementAssignment'
+        contains:
           type: array
-          items: 
-            $ref: '#/components/schemas/RoleRoleAssignment'
+          items:
+            $ref: '#/components/schemas/roleRoleAssignment'
+        containedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/roleRoleAssignment'
       xml:
         name: role
   #Entitlements:
-    Entitlement:
+    entitlement:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        Roles:
+        roles:
           type: array
           items: 
-            $ref: '#/components/schemas/RoleEntitlementAssignment'
+            $ref: '#/components/schemas/roleEntitlementAssignment'
         #User:
           #type: array
           #items: 
             #$ref: '#/components/schemas/EntitlementUserAssignment'
-        Accounts:
+        accounts:
           type: array
           items: 
-            $ref: '#/components/schemas/EntitlementAccountAssignment'
-        Application:
-            $ref: '#/components/schemas/EntitlementApplicationAssignment'
-        Entitlement:
+            $ref: '#/components/schemas/entitlementAccountAssignment'
+        application:
+            $ref: '#/components/schemas/entitlementApplicationAssignment'
+        contains:
           type: array
-          items: 
-            $ref: '#/components/schemas/EntitlementEntitlementAssignment'
+          items:
+            $ref: '#/components/schemas/entitlementEntitlementAssignment'
+        containedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/entitlementEntitlementAssignment'
       xml:
         name: entitlement
   #Application:
-    Application:
+    application:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        Entitlements:
+        entitlements:
           type: array
           items: 
-            $ref: '#/components/schemas/EntitlementApplicationAssignment'
-        Accounts:
+            $ref: '#/components/schemas/entitlementApplicationAssignment'
+        accounts:
           type: array
           items: 
-            $ref: '#/components/schemas/ApplicationAccountAssignment'
+            $ref: '#/components/schemas/applicationAccountAssignment'
       xml:
         name: application
   #Account:
-    Account:
+    account:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        User:
-            $ref: '#/components/schemas/UserAccountAssignment'
-        Application:
+        user:
+            $ref: '#/components/schemas/userAccountAssignment'
+        application:
           type: object
           items: 
-            $ref: '#/components/schemas/ApplicationAccountAssignment'
-        Entitlements:
+            $ref: '#/components/schemas/applicationAccountAssignment'
+        entitlements:
           description: Account to Entitlement assignment, displayed as Entitlement-arry in SCIM Account resource
           type: array
           items: 
-            $ref: '#/components/schemas/EntitlementAccountAssignment'
-        AllowlistSoDs:
+            $ref: '#/components/schemas/entitlementAccountAssignment'
+        allowListSoDs:
           description: tbd
           type: array
           items:
-            $ref: '#/components/schemas/SoDAccountAssignment'
+            $ref: '#/components/schemas/sodAccountAssignment'
       xml:
         name: account
   #Group:
-    Group:
+    group:
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: '#/components/schemas/resource'
       properties:
-        User:
+        user:
           type: array
           items: 
-            $ref: '#/components/schemas/UserGroupAssignment'
-        Groups:
+            $ref: '#/components/schemas/userGroupAssignment'
+        contains:
           type: array
-          items: 
-            $ref: '#/components/schemas/GroupGroupAssignment'
-        AllowlistSoDs:
+          items:
+            $ref: '#/components/schemas/groupGroupAssignment'
+        containedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/groupGroupAssignment'
+        allowListSoDs:
           description: tbd
           type: array
           items:
-            $ref: '#/components/schemas/SoDGroupAssignment'
+            $ref: '#/components/schemas/sodGroupAssignment'
       required:
         - displayName
       xml:
         name: group
   #SCIM defined statdard Schemas:  
   #Ressource Typ:
-    ResourceType:
+    resourceType:
       description: specifies the metadata about a ResourceType
       type: object
       properties:
@@ -1966,7 +2396,7 @@ components:
               Schema: urn:ietf:params:scim:schemas:extension:enterprise:2.0:User
               required: true
   #Schema:
-    Schema:
+    schema:
       description: specify the schema in use by resources available and accepted by a SCIM service provider
       type: object
       properties:
@@ -2058,7 +2488,8 @@ components:
             type: string
           example:
             - urn:ietf:params:scim:schemas:core:2.0:Schema
-    ServiceProviderConfig:
+  #ServiceProviderConfig
+    serviceProviderConfig:
       required:
         - patch
         - etag
@@ -2198,66 +2629,122 @@ components:
               type: string
               description: Resource type of the metadata subject.
               example: ServiceProviderConfig
-
-    ApiObjectResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        type:
-          type: string
-        message:
-          type: string
-      xml:
-        name: '##default'
-    ApiArrayResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        type:
-          type: string
-        list:
-          type: array
-          items: 
-           $ref: '#/components/schemas/Resource'
-  
-  
   #Bodys:
   #requestBodies:
-    #UserArray:
-      #description: List of user object
+    #PatchBody:
+      #content:
+        #application/json:
+          #schema:
+            #$ref: '#/components/schemas/PatchBody'
+  #ResponseBodys
+    #ListResponse:
+      #description: List of resource objects
       #content:
         #application/json:
           #schema:
             #type: array
             #items:
               #$ref: '#/components/schemas/User'
-    #PatchBody:
-      #content:
-        #application/json:
-          #schema:
-            #$ref: '#/components/schemas/PatchBody'
-  
+    ObjectResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          oneOf:
+              - $ref: '#/components/schemas/user'
+              - $ref: '#/components/schemas/role'
+              - $ref: '#/components/schemas/entitlement'
+              - $ref: '#/components/schemas/account'
+              - $ref: '#/components/schemas/application'
+              - $ref: '#/components/schemas/group'
+              - $ref: '#/components/schemas/sod'
+              - $ref: '#/components/schemas/session'
+              - $ref: '#/components/schemas/schema'
+              - $ref: '#/components/schemas/resourceType'
+              - $ref: '#/components/schemas/serviceProviderConfig'
+        message:
+          type: string
+      #xml:
+        #name: '##default'
+    ListResponse:
+      type: object
+      properties:
+        totalResults:
+          type: integer
+          format: int32
+        Resources:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/user'
+              - $ref: '#/components/schemas/role'
+              - $ref: '#/components/schemas/entitlement'
+              - $ref: '#/components/schemas/account'
+              - $ref: '#/components/schemas/application'
+              - $ref: '#/components/schemas/group'
+              - $ref: '#/components/schemas/sod'
+              - $ref: '#/components/schemas/session'
+              - $ref: '#/components/schemas/schema'
+              - $ref: '#/components/schemas/resourceType'
+              - $ref: '#/components/schemas/serviceProviderConfig'
+        startIndex:
+          type: integer
+          format: int32
+        itemsPerPage:
+          type: integer
+          format: int32
+          
   #Security
   securitySchemes:
-    scim_auth:
+    rbac_scim_auth:
       type: oauth2
       flows:
-        authorizationCode:
-          tokenUrl: https://testURL.com/oauth/authorize
-          authorizationUrl: https://testURL.com/oauth/authorize
+        clientCredentials:
+          tokenUrl: 'http://api.example.com/v1/oauth/authorize'
           scopes:
-            write_obj: modify objects
-            read_obj: read objects
+            'create:users': create users
+            'create:groups': create groups
+            'create:roles': create roles
+            'create:applications': create applications
+            'create:entitlements': create entitlements
+            'create:accounts': create accounts
+
+            'read:users': read users
+            'read:groups': read groups
+            'read:roles': read roles
+            'read:applications': read applications
+            'read:entitlements': read entitlements
+            'read:accounts': read accounts
+
+            'update:users': update users
+            'update:groups': update groups
+            'update:roles': update roles
+            'update:applications': update applications
+            'update:entitlements': update entitlements
+            'update:accounts': update accounts
+
+            'delete:users': delete users
+            'delete:groups': delete groups
+            'delete:roles': delete roles
+            'delete:applications': delete applications
+            'delete:entitlements': delete entitlements
+            'delete:accounts': delete accounts
+      #type: oauth2
+      #flows:
+        #authorizationCode:
+          #tokenUrl: https://testURL.com/oauth/authorize
+          #authorizationUrl: https://testURL.com/oauth/authorize
+          #scopes:
+            #write_obj: modify objects
+            #read_obj: read objects
     #api_key:
       #type: apiKey
       #name: api_key
       #in: header
       
-security: 
-  - scim_auth: 
-    - write_obj
-    - read_obj
+#security: 
+  #- scim_auth: 
+    #- write_obj
+    #- read_obj
