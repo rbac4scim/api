@@ -8,7 +8,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.0.1
+  version: 1.0.0
 externalDocs:
   description: Find out more about SCIM
   url: https://datatracker.ietf.org/doc/html/rfc7642
@@ -43,13 +43,178 @@ tags:
     externalDocs:
       description: 'Full session documentation @'
       url: 'https://profsandhu.com/cs5323_s17/sandhu-1998.pdf'
+  - name: Utility
+    description: 'Utility endpoints mentioned across the SCIM RFC family'
+    externalDocs:
+      description: 'Documentation @'
+      url: 'https://datatracker.ietf.org/doc/html/rfc7644'
   - name: Configuration
     description: 'HTTP methods with Configuration resource(s)'
     externalDocs:
       description: 'Full Configuration documentaion @'
       url: 'https://www.rfc-editor.org/rfc/rfc7644.html#section-4'
 paths:
+  /Users/.search:
+    post:
+      tags:
+        - User
+      summary: Get filtered or all Users
+      description: This endpoint returns all or filtered Users. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchUsers
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Users'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/UserListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:users
   /Users:
+    post:
+      tags:
+        - User
+      summary: Create new user resource
+      description: Creates a new User. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createUser
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,groups,roles,accounts
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new user resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: 'Success - User created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - create:users
     get:
       tags:
         - User
@@ -163,95 +328,6 @@ paths:
       security:
         - rbac_scim_auth:
             - read:users
-    post:
-      tags:
-        - User
-      summary: Create new user resource
-      description: Creates a new User. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createUser
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,groups,roles,accounts
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new user resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        '201':
-          description: 'Success - User created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-            - create:users
   /Users/{id}:
     get:
       tags:
@@ -621,7 +697,167 @@ paths:
       security:
         - rbac_scim_auth:
             - delete:users
+  /Groups/.search:
+    post:
+      tags:
+        - Group
+      summary: Get filtered or all Groups
+      description: This endpoint returns all or filtered Groups. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchGroups
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Groups'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/GroupListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:groups
   /Groups:
+    post:
+      tags:
+        - Group
+      summary: Create new group resource
+      description: Creates a new Group. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createGroup
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,members
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new group resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '201':
+          description: 'Success - Group created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:groups
     get:
       tags:
         - Group
@@ -735,95 +971,6 @@ paths:
       security:
         - rbac_scim_auth:
           - read:groups
-    post:
-      tags:
-        - Group
-      summary: Create new group resource
-      description: Creates a new Group. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createGroup
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,members
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new group resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/Group'
-      responses:
-        '201':
-          description: 'Success - Group created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Group'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:groups
   /Groups/{id}:
     get:
       tags:
@@ -1192,7 +1339,167 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:groups
+  /Roles/.search:
+    post:
+      tags:
+        - Role
+      summary: Get filtered or all Roles
+      description: This endpoint returns all or filtered Roles. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchRoles
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Roles'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/RoleListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:roles
   /Roles:
+    post:
+      tags:
+        - Role
+      summary: Create new role resource
+      description: Creates a new Role. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createRole
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,users,entitlements
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new role resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '201':
+          description: 'Success - Role created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:roles
     get:
       tags:
         - Role
@@ -1306,95 +1613,6 @@ paths:
       security:
         - rbac_scim_auth:
           - read:roles
-    post:
-      tags:
-        - Role
-      summary: Create new role resource
-      description: Creates a new Role. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createRole
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,users,entitlements
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new role resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/Role'
-      responses:
-        '201':
-          description: 'Success - Role created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Role'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:roles
   /Roles/{id}:
     get:
       tags:
@@ -1763,7 +1981,167 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:roles
+  /Entitlements/.search:
+    post:
+      tags:
+        - Entitlement
+      summary: Get filtered or all Entitlements
+      description: This endpoint returns all or filtered Entitlements. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchEntitlements
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Roles'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/EntitlementListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:entitlements
   /Entitlements:
+    post:
+      tags:
+        - Entitlement
+      summary: Create new entitlement resource
+      description: Creates a new Entitlement. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createEntitlement
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,roles,accounts,application
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new entitlement resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Entitlement'
+      responses:
+        '201':
+          description: 'Success - Entitlement created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Entitlement'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:entitlements
     get:
       tags:
         - Entitlement
@@ -1877,95 +2255,6 @@ paths:
       security:
         - rbac_scim_auth:
           - read:entitlements
-    post:
-      tags:
-        - Entitlement
-      summary: Create new entitlement resource
-      description: Creates a new Entitlement. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createEntitlement
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,roles,accounts,application
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new entitlement resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/Entitlement'
-      responses:
-        '201':
-          description: 'Success - Entitlement created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Entitlement'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:entitlements
   /Entitlements/{id}:
     get:
       tags:
@@ -2334,7 +2623,167 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:entitlements
+  /Accounts/.search:
+    post:
+      tags:
+        - Account
+      summary: Get filtered or all Accounts
+      description: This endpoint returns all or filtered Accounts. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchAccounts
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Accounts'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/AccountListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:accounts
   /Accounts:
+    post:
+      tags:
+        - Account
+      summary: Create new account resource
+      description: Creates a new Account. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createAccount
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,user,application,entitlements
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new account resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '201':
+          description: 'Success - Account created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:accounts
     get:
       tags:
         - Account
@@ -2448,95 +2897,6 @@ paths:
       security:
         - rbac_scim_auth:
           - read:accounts
-    post:
-      tags:
-        - Account
-      summary: Create new account resource
-      description: Creates a new Account. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createAccount
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,user,application,entitlements
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new account resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/Account'
-      responses:
-        '201':
-          description: 'Success - Account created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Account'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:accounts
   /Accounts/{id}:
     get:
       tags:
@@ -2905,7 +3265,167 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:accounts
+  /Applications/.search:
+    post:
+      tags:
+        - Application
+      summary: Get filtered or all Applications
+      description: This endpoint returns all or filtered Applications. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchApplications
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Applications'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/ApplicationListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:applications
   /Applications:
+    post:
+      tags:
+        - Application
+      summary: Create new application
+      description: Creates a new Application. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createApplication
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,entitlements,accounts
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new application resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Application'
+      responses:
+        '201':
+          description: 'Success - Application created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:applications
     get:
       tags:
         - Application
@@ -3019,95 +3539,6 @@ paths:
       security:
         - rbac_scim_auth:
           - read:applications
-    post:
-      tags:
-        - Application
-      summary: Create new application
-      description: Creates a new Application. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createApplication
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,entitlements,accounts
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new application resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/Application'
-      responses:
-        '201':
-          description: 'Success - Application created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Application'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:applications
   /Applications/{id}:
     get:
       tags:
@@ -3476,7 +3907,167 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:applications
+  /SoDs/.search:
+    post:
+      tags:
+        - SoD
+      summary: Get filtered or all SoDs
+      description: This endpoint returns all or filtered SoDs. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchSoDs
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all SoDs'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/SoDListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:sods
   /SoDs:
+    post:
+      tags:
+        - SoD
+      summary: Create new SoD resource
+      description: Creates a new SoD. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createSoD
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,exclusions,allowList
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new SoD resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/SoD'
+      responses:
+        '201':
+          description: 'Success - SoD created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/SoD'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:sods
     get:
       tags:
         - SoD
@@ -3590,95 +4181,6 @@ paths:
       security:
         - rbac_scim_auth:
             - read:sods
-    post:
-      tags:
-        - SoD
-      summary: Create new SoD resource
-      description: Creates a new SoD. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createSoD
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,exclusions,allowList
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new SoD resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/SoD'
-      responses:
-        '201':
-          description: 'Success - SoD created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/SoD'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:sods
   /SoDs/{id}:
     get:
       tags:
@@ -4048,7 +4550,167 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:sods
+  /Sessions/.search:
+    post:
+      tags:
+        - Session
+      summary: Get filtered or all Sessions
+      description: This endpoint returns all or filtered Sessions. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: searchSessions
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of allSessions'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/SessionListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:sessions
   /Sessions:
+    post:
+      tags:
+        - Session
+      summary: Create new Session resource
+      description: Creates a new Session. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
+      operationId: createSession
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id,active
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'Content to create new Session resource'
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: 'Success - Session created'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - create:sessions
     get:
       tags:
         - Session
@@ -4162,95 +4824,6 @@ paths:
       security:
         - rbac_scim_auth:
             - read:sessions
-    post:
-      tags:
-        - Session
-      summary: Create new Session resource
-      description: Creates a new Session. Some attributes might be immutable, thus make sure these are set correctly for creation. Unset required attributes might lead to assertions or insertion of default values. Readonly attributes are ignored. The query parameters attribues and excludedAttributes refer to the response upon success. The id attributes is set by the Service Provider to ensure uniqueness.
-      operationId: createSession
-      parameters:
-        - in: query
-          name: attributes
-          schema:
-            type: string
-            example: id,active
-          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-        - in: query
-          name: excludedAttributes
-          schema:
-            type: string
-            example: schema,meta
-          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
-      requestBody:
-        description: 'Content to create new Session resource'
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/Session'
-      responses:
-        '201':
-          description: 'Success - Session created'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Session'
-        '307':
-          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '308':
-          description: 'Permanent redirect - Use the provided URI for the next request permanently'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '400':
-          description: 'Bad request - See scimType for further information'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: 'Unauthorized - Authentication failed try again with a valid authentication'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: 'Forbidden - Authentication was successful but the user is not authorized'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 'Not found - No resource with provided Id'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error - Implementers provide a descriptive debugging advice'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '501':
-          description: 'Not implemented - Service provider does not support the request'
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        - rbac_scim_auth:
-          - create:sessions
   /Sessions/{id}:
     get:
       tags:
@@ -4620,6 +5193,186 @@ paths:
       security:
         - rbac_scim_auth:
           - delete:sessions
+  /.search:
+    post:
+      tags:
+        - Utility
+      summary: Get filtered or all Resources
+      description: This endpoint returns all or filtered Resources. Utilize the request body (SearchRequest) parameters to configure filtering, sorting, pagination and in-/excluded attribues. After receiving an HTTP POST request, a response is returned as specified in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      operationId: search
+      requestBody:
+        description: 'SearchRequest with the required parameters'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Users'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/GeneralListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - read:users
+            - read:groups
+            - read:roles
+            - read:entitlements
+            - read:accounts
+            - read:applications
+            - read:sods
+            - read:sessions
+  /Bulk:
+    post:
+      tags:
+        - Utility
+      summary: Create, update or delete resources by a bulk request
+      description: The SCIM bulk operation is an optional server feature that enables clients to send a potentially large collection of resource operations in a single request.  Support for bulk requests can be discovered by querying the service provider configuration (see [Section 4 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-4)).  The body of a bulk operation contains a set of HTTP resource operations using one of the HTTP methods supported by the API, i.e., POST, PUT, PATCH, or DELETE. <p> Bulk requests are identified using the following schema URI \"urn:ietf:params:scim:api:messages:2.0:BulkRequest\".  Bulk responses are identified using the following URI \"urn:ietf:params:scim:api:messages:2.0:BulkResponse\".  Bulk requests and bulk responses share many attributes.  Unless otherwise specified, each attribute below is present in both bulk requests and bulk responses. <p> If a bulk job is processed successfully, HTTP response code 200 OK MUST be returned; otherwise, an appropriate HTTP error code MUST be returned. <p> The service provider MUST continue performing as many changes as possible and disregard partial failures.  The client MAY override this behavior by specifying a value for the \"failOnErrors\" attribute. The \"failOnErrors\" attribute defines the number of errors that the service provider should accept before failing the remaining operations returning the response. <p> To be able to reference a newly created resource, the bulkId attribute MAY be specified when creating new resources.  The \"bulkId\" is defined by the client as a surrogate identifier in a POST operation (see [Section 3.7.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.7.2)).  The service provider MUST return the same \"bulkId\" together with the newly created resource.  The \"bulkId\" can then be used by the client to map the service provider id with the \"bulkId\" of the created resource. <p> A SCIM service provider MAY elect to optimize the sequence of operations received (e.g., to improve processing performance).  When doing so, the service provider MUST ensure that the client's intent is preserved and the same stateful result is achieved as for non-optimized processing.  For example, before a \"User\" can be added to a \"Group\", they must first be created.  Processing these requests out of order might result in a failure to add the new \"User\" to the \"Group\".
+      operationId: bulk
+      parameters:
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: id
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      requestBody:
+        description: 'A bulk request combining atomic requests boosting performance by sending them together.'
+        content:
+          application/scim+json:
+            schema: 
+              $ref: '#/components/schemas/BulkRequest'
+      responses:
+        '200':
+          description: 'Success - list of all Users'
+          content:
+            application/scim+json:
+              schema:
+                  $ref: '#/components/schemas/BulkResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Conflict - Outdated version number or refusal of Service Provider to create a duplicate'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '412':
+          description: 'Precondition failed - Failed to update. Resource has changed on the server.'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 'Payload too large - Try sending a smaller request.'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+            - cud:bulk
   /ServiceProviderConfig:
     get:
       operationId: getServiceProviderConfig
@@ -4739,6 +5492,95 @@ paths:
             example: 10
             default: 1000
           description: Non-negative integer. Specifies the desired maximum number of query results per page, e.g., 10. A negative value SHALL be interpreted as \"0\". A value of \"0\" indicates that no resource results are to be returned except for \"totalResults\". 
+        - in: query
+          name: attributes
+          schema:
+            type: string
+            example: name,attributes
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation (see [Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form. See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+        - in: query
+          name: excludedAttributes
+          schema:
+            type: string
+            example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://www.rfc-editor.org/rfc/rfc7644#section-2.2) and [7](https://www.rfc-editor.org/rfc/rfc7644#section-7) of RFC7644).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://www.rfc-editor.org/rfc/rfc7644#section-3.9) for additional retrieval query parameters.
+      responses:
+        '200':
+          description: 'Success - list of all Sessions'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/SchemasListResponse'
+        '307':
+          description: 'Temporary redirect - Use the provided URI for the next request, but not permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '308':
+          description: 'Permanent redirect - Use the provided URI for the next request permanently'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: 'Bad request - See scimType for further information'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized - Authentication failed try again with a valid authentication'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden - Authentication was successful but the user is not authorized'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found - No resource with provided Id'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error - Implementers provide a descriptive debugging advice'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: 'Not implemented - Service provider does not support the request'
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - rbac_scim_auth:
+          - read:schemas
+  /Schemas/{urn}:
+    get:
+      tags:
+        - Configuration
+      summary: Get schema by urn
+      description: "
+        An HTTP GET to this endpoint is used to retrieve information about resource schemas supported by a SCIM service provider.  An HTTP GET to the endpoint \"/Schemas\" SHALL return all supported schemas in ListResponse format (see Figure 3).  Individual schema definitions can be returned by appending the schema URI to the /Schemas endpoint.  For example
+        <p>/Schemas/urn:ietf:params:scim:schemas:core:2.0:User</p>
+        The contents of each schema returned are described in [Section 7 of RFC7643](https://www.rfc-editor.org/rfc/rfc7643#section-7)."
+      operationId: getSchemaByUrn
+      parameters:
+        - in: path
+          name: urn
+          schema:
+            type: string
+            format: urn
+            example: urn:ietf:params:scim:schemas:core:2.0:User
+          required: true
+          description: Query an individual schema by passing its full urn.
         - in: query
           name: attributes
           schema:
@@ -5945,6 +6787,25 @@ components:
         - totalResults
         - startIndex
         - itemsPerPage
+  #GeneralListResponse
+    GeneralListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+      properties:
+        Resource:
+          type: array
+          items:
+            oneOf: 
+              - $ref: '#/components/schemas/User'
+              - $ref: '#/components/schemas/Group'
+              - $ref: '#/components/schemas/Role'
+              - $ref: '#/components/schemas/Entitlement'
+              - $ref: '#/components/schemas/Account'
+              - $ref: '#/components/schemas/Application'
+              - $ref: '#/components/schemas/Session'
+              - $ref: '#/components/schemas/SoD'
+      required:
+        - Resource
   #UserListResponse:
     UserListResponse:
       allOf:
@@ -6143,13 +7004,149 @@ components:
             required:
               - op
               - path
+  #BulkOperation
+    BulkOperation:
+      description: Defines operations within a bulk job.  Each operation corresponds to a single HTTP request against a resource endpoint.  REQUIRED.
+      type: object
+      required:
+        - method
+      properties:
+        method:
+          type: string
+          enum:
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+          example: PUT
+          description: The HTTP method of the current operation.  Possible values are \"POST\", \"PUT\", \"PATCH\", or \"DELETE\".  REQUIRED.
+        bulkId:
+          type: string
+          example: qwerty
+          description: The transient identifier of a newly created resource, unique within a bulk request and created by the client.  The bulkId serves as a surrogate resource id enabling clients to uniquely identify newly created resources in the response and cross-reference new resources in and across operations within a bulk request.  REQUIRED when \"method\" is \"POST\".
+        version: 
+          type: string
+          example: W/wGB85s2QJMjiNnuI
+          description: The current resource version.  Version MAY be used if the service provider supports entity-tags (ETags) [Section 2.3 of RFC7232](https://www.rfc-editor.org/rfc/rfc7232#section-2.3) and \"method\" is \"PUT\", \"PATCH\", or \"DELETE\".
+        path:
+          type: string
+          example: /Users/2819c223-7f76-453a-919d-413861904646
+          description: The resource's relative path to the SCIM service provider's root.  If \"method\" is \"POST\", the value must specify a resource type endpoint, e.g., /Users or /Groups, whereas all other \"method\" values must specify the path to a specific resource, e.g., /Users/2819c223-7f76-453a-919d-413861904646.  REQUIRED in a request.
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/User'
+            - $ref: '#/components/schemas/Group'
+            - $ref: '#/components/schemas/Role'
+            - $ref: '#/components/schemas/Entitlement'
+            - $ref: '#/components/schemas/Account'
+            - $ref: '#/components/schemas/Application'
+            - $ref: '#/components/schemas/Session'
+            - $ref: '#/components/schemas/SoD'
+          description: The resource data as it would appear for a single SCIM POST, PUT, or PATCH operation.  REQUIRED in a request when \"method\" is \"POST\", \"PUT\", or \"PATCH\".
+        location:
+          type: string
+          example: https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646
+          description: The resource endpoint URL.  REQUIRED in a response, except in the event of a POST failure.
+        response:
+          type: object
+          description: The HTTP response body for the specified request operation.  When indicating a response with an HTTP status other than a 200-series response, the response body MUST be included.  For normal completion, the server MAY elect to omit the response body.
+          allOf:
+            - $ref: '#/components/schemas/Error'
+        status:
+          type: integer
+          example: 200
+          description: The HTTP response status code for the requested operation. When indicating an error, the \"response\" attribute MUST contain the detail error response as per [Section 3.12 RFC7644](https://www.rfc-editor.org/rfc/rfc7644.html#section-3.12).
+
+  #BulkRequest
+    BulkRequest:
+      type: object
+      required:
+        - Operations
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+          default: urn:ietf:params:scim:api:messages:2.0:BulkRequest
+        failOnErrors:
+          type: integer
+          example: 5
+          description: An integer specifying the number of errors that the service provider will accept before the operation is terminated and an error response is returned.  OPTIONAL in a request.  Not valid in a response.
+        Operations:
+          required:
+            - path
+            - data
+          allOf: 
+            - $ref: '#/components/schemas/BulkOperation'
+            - type: object
+
+  #BulkResponse
+    BulkResponse:
+      required:
+        - Operations
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+          default: urn:ietf:params:scim:api:messages:2.0:BulkResponse
+        Operations:
+          allOf: 
+            - $ref: '#/components/schemas/BulkOperation'
+            - type: object
+  #SearchRequest
+    SearchRequest:
+      description: Clients MAY execute queries without passing parameters on the URL by using the HTTP POST verb combined with the \"/.search\" path extension. The inclusion of \"/.search\" on the end of a valid SCIM endpoint SHALL be used to indicate that the HTTP POST verb is intended to be a query operation. <p> To create a new query result set, a SCIM client sends an HTTP POST request to the desired SCIM resource endpoint (ending in \"/.search\"). The body of the POST request MAY include any of the parameters defined in [Section 3.4.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2).
+      required:
+        - schemas
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+          example: urn:ietf:params:scim:api:messages:2.0:SearchRequest
+          description: Query requests MUST be identified using the following URI \"urn:ietf:params:scim:api:messages:2.0:SearchRequest\".
+        attributes:
+          type: string
+          example: id
+          description: A multi-valued list of strings indicating the names of resource attributes to return in the response, overriding the set of attributes that would be returned by default.  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.9) for additional retrieval query parameters.  OPTIONAL.  
+        excludedAttributes:
+          type: string
+          example: schema,meta
+          description: A multi-valued list of strings indicating the names of resource attributes to be removed from the default set of attributes to return.  This parameter SHALL have no effect on attributes whose schema \"returned\" setting is \"always\" (see Sections [2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-2.2) and [7](https://datatracker.ietf.org/doc/html/rfc7644#section-7) of [RFC7643](https://datatracker.ietf.org/doc/html/rfc7643)).  Attribute names MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.10)) form.  See [Section 3.9 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.9) for additional retrieval query parameters.  OPTIONAL.
+        filter:
+          type: string
+          example: filter=meta.lastModified gt "2011-05-13T04:42:34Z"
+          description: The filter string used to request a subset of resources.  The filter string MUST be a valid filter ([Section 3.4.2.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2)) expression. OPTIONAL.
+        sortBy:
+          type: string
+          example: id
+          description: A string indicating the attribute whose value SHALL be used to order the returned responses.  The \"sortBy\" attribute MUST be in standard attribute notation ([Section 3.10 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.10)) form.  See [Section 3.4.2.3 of RFC7643](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.3).  OPTIONAL.
+        sortOrder:
+          type: string
+          example: descending
+          default: ascending
+          enum:
+            - ascending
+            - descending
+          description: A string indicating the order in which the \"sortBy\" parameter is applied.  Allowed values are \"ascending\" and \"descending\".  See [Section 3.4.2.3 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.3).  OPTIONAL.
+        startIndex:
+          type: integer
+          example: 1
+          default: 1
+          description: An integer indicating the 1-based index of the first query result.  See [Section 3.4.2.4 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.4).  OPTIONAL.
+        count:
+          type: integer
+          example: 1000
+          default: 1000
+          description: An integer indicating the desired maximum number of query results per page.  See [Section 3.4.2.4 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.4).  OPTIONAL.
   #Security
   securitySchemes:
     rbac_scim_auth:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: 'http://api.example.com/v1/oauth/authorize'
+          tokenUrl: 'http://api.example.com/v2/oauth/authorize'
           scopes:
             'create:users': create users
             'create:groups': create groups
@@ -6189,3 +7186,5 @@ components:
             'delete:accounts': delete accounts
             'delete:sods': delete sods
             'delete:sessions': delete sessions
+            
+            'cud:bulk': bulk requests
