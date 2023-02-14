@@ -3,7 +3,6 @@ info:
   description: <p>This is a prototypical implementation of a RBAC Profile in SCIM. Find more about SCIM, <a href="https://datatracker.ietf.org/doc/html/rfc7642"> RFC7642 SCIM Overview</a>, <a href="https://datatracker.ietf.org/doc/html/rfc7643"> RFC7643 SCIM data model</a>, <a href="https://datatracker.ietf.org/doc/html/rfc7644"> RFC7644 SCIM Protocol</a>. It enhances the SCIM Core definition about RBAC (Role Based Access Control). The profile adds thus Roles, Entitlements, Accounts, Applications, Sessions and SoDs (Separation of Duties).</p>
     <p>Use Cases might include application provisioning, add-on software for IdM systems for role modelling, access reviews or SoD firewalls.</p>
     <p>This is research project and highlights an advanced SCIM API design. We hope to contribute with this design to current efforts to expose RBAC data in SCIM.</p>
-    <p>We will add a link to the paper and author information. As soon as the paper is accepted (anonymous submission).</p>
   title: A RBAC Profile for SCIM - OpenAPI 3.0
   license:
     name: Apache 2.0
